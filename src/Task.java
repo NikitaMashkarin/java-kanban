@@ -1,13 +1,21 @@
+import java.util.Objects;
+
 public class Task {
-    private final String title;
-    private final String description;
-    private int id = 0;
+    private String title;
+    private String description;
+    private int id;
     private StatusTask status;
+
+    public Task(String title, String description, int id, StatusTask status) {
+        this.title = title;
+        this.description = description;
+        this.id = id;
+        this.status = status;
+    }
 
     public Task(String title, String description) {
         this.title = title;
-        this.description = description;
-        id++;
+        this.description = description;;
         this.status = StatusTask.NEW;
     }
 
@@ -31,6 +39,18 @@ public class Task {
         this.status = status;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -39,5 +59,19 @@ public class Task {
                 ", id=" + id +
                 ", status=" + status +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id && Objects.equals(title, task.title) && Objects.equals(description, task.description)
+                && status == task.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, description, id, status);
     }
 }
