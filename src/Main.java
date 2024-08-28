@@ -1,9 +1,14 @@
+import java.util.ArrayList;
+
 public class Main {
     public static void main (String[] args){
         TaskManager taskManager = new TaskManager();
         Task washTheFloor = new Task("Помыть пол", "...");
         taskManager.addTask(washTheFloor);
-        taskManager.printAllTasks();
+        ArrayList<Task> tasks = taskManager.printAllTasks();
+        for (Task t : tasks){
+            System.out.println(t);
+        }
         System.out.println(taskManager.getTaskById(1));
 
         Epic washTheWindow = new Epic("Помыть окна", "...");
@@ -16,10 +21,9 @@ public class Main {
         subtaskWashTheWindow = new Subtask("Намочить тряпку", "...", washTheWindow.getId());
         taskManager.addSubtask(subtaskWashTheWindow);
         taskManager.printAllSubtask();
-        System.out.println(taskManager.getSudtaskById(3));
+        System.out.println(taskManager.getSubtaskById(3));
         taskManager.getSubtaskCertainEpic(2);
         subtaskWashTheWindow.setStatus(StatusTask.DONE);
-        taskManager.calculationStatusEpic(washTheWindow);
         taskManager.printAllEpics();
 
         Task waterTheFlowers = new Task("Полить цветы", "...");
