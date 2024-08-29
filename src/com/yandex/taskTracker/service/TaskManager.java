@@ -87,12 +87,12 @@ public class TaskManager {
         int subtaskId = subtask.getId();
         int epicId = subtask.getEpicId();
         Subtask oldSubtask = subtasks.get(subtaskId);
-        subtasks.remove(subtaskId);
         subtasks.put(subtaskId, subtask);
         Epic epic = epics.get(epicId);
         ArrayList<Subtask> oldSubtasks = epic.getSubtasks();
         oldSubtasks.remove(oldSubtask);
         oldSubtasks.add(subtask);
+        calculationStatusEpic(epic);
     }
 
     public void removeTaskById(int id) {
@@ -100,8 +100,7 @@ public class TaskManager {
     }
 
     public void removeEpicById(int id) {
-        ArrayList<Subtask> epicSubtask = epics.get(id).getSubtasks();
-        epics.remove(id);
+        ArrayList<Subtask> epicSubtask = epics.remove(id).getSubtasks();
         for (Subtask subtask : epicSubtask) {
             subtasks.remove(subtask.getId());
         }
@@ -124,22 +123,24 @@ public class TaskManager {
         int statusNew = 0;
         int statusDone = 0;
 
-        ArrayList<Subtask> subtask = epic.getSubtasks();
-        for (Subtask subt : subtask) {
-            if (subt.getStatus() == StatusTask.NEW) {
+        ArrayList<Subtask> subtasks = epic.getSubtasks();
+        for (Subtask subtask : subtasks) {
+            final StatusTask status = subtask.getStatus();
+            if (status == StatusTask.NEW) {
                 statusNew++;
+            } else if (status == StatusTask.DONE) {
+                statusDone++;
             } else {
-                if (subt.getStatus() != StatusTask.IN_PROGRESS) {
-                    statusDone++;
-                }
+                epic.setStatus(StatusTask.IN_PROGRESS);
+                return;
             }
         }
-        int subtaskSize = subtask.size();
+        int subtaskSize = subtasks.size();
         if (statusNew == subtaskSize) {
             epic.setStatus(StatusTask.NEW);
         } else if (statusDone == subtaskSize) {
             epic.setStatus(StatusTask.DONE);
-        } else  {
+        } else {
             epic.setStatus(StatusTask.IN_PROGRESS);
         }
     }
