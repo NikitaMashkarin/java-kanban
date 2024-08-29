@@ -3,57 +3,31 @@ import java.util.ArrayList;
 public class Main {
     public static void main (String[] args){
         TaskManager taskManager = new TaskManager();
-        Task washTheFloor = new Task("Помыть пол", "...");
-        taskManager.addTask(washTheFloor);
-        ArrayList<Task> tasks = taskManager.printAllTasks();
-        for (Task t : tasks){
-            System.out.println(t);
-        }
-        System.out.println(taskManager.getTaskById(1));
 
-        Epic washTheWindow = new Epic("Помыть окна", "...");
-        taskManager.addEpic(washTheWindow);
-        System.out.println(taskManager.getEpicById(2));
-        taskManager.printAllEpics();
+        Task washFloor = new Task("Помыть полы", "С новым средством");
+        taskManager.addTask(washFloor);
+        System.out.println(washFloor);
 
-        Subtask subtaskWashTheWindow = new Subtask("Набрать воду", "...", washTheWindow.getId());
-        taskManager.addSubtask(subtaskWashTheWindow);
-        subtaskWashTheWindow = new Subtask("Намочить тряпку", "...", washTheWindow.getId());
-        taskManager.addSubtask(subtaskWashTheWindow);
-        taskManager.printAllSubtask();
-        System.out.println(taskManager.getSubtaskById(3));
-        taskManager.getSubtaskCertainEpic(2);
-        subtaskWashTheWindow.setStatus(StatusTask.DONE);
-        taskManager.printAllEpics();
+        Task washFloorToUpdate = new Task("Не забыть помыть полы", "Можно и без средства",washFloor.getId(),
+                StatusTask.IN_PROGRESS);
+        Task washFloorUpdated = taskManager.updateTask(washFloorToUpdate);
+        System.out.println(washFloorUpdated);
 
-        Task waterTheFlowers = new Task("Полить цветы", "...");
-        taskManager.updateTask(waterTheFlowers);
-        Task waterTheRose = new Task("Полить розы", "...");
-        taskManager.updateTask(waterTheRose);
-        taskManager.printAllTasks();
-        taskManager.removeTaskById(1);
-        taskManager.printAllTasks();
-        taskManager.removeSubtaskById(3);
-        taskManager.printAllEpics();
-        taskManager.removeEpicById(2);
-        taskManager.printAllEpics();
 
-        taskManager.printAllSubtask();
+        Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
+        taskManager.addEpic(flatRenovation);
+        System.out.println(flatRenovation);
+        Subtask flatRenovationSubtask1 = new Subtask("Поклеить обои", "Обязательно светлые!",
+                flatRenovation.getId());
+        Subtask flatRenovationSubtask2 = new Subtask("Установить новую технику", "Старую продать на Авито",
+                flatRenovation.getId());
+        taskManager.addSubtask(flatRenovationSubtask1);
+        taskManager.addSubtask(flatRenovationSubtask2);
+        System.out.println(flatRenovation);
+        flatRenovationSubtask2.setStatus(StatusTask.DONE);
+        taskManager.updateSubtask(flatRenovationSubtask2);
+        System.out.println(flatRenovation);
 
-        Epic buyBread  = new Epic("купить хлеб", "...");
-        taskManager.updateEpic(buyBread);
-        taskManager.printAllEpics();
-
-        Subtask buyMilk = new Subtask("купить иолоко", "...");
-        taskManager.updateSubtask(buyMilk);
-        taskManager.printAllSubtask();
-
-        taskManager.deleteTasks();
-        taskManager.printAllTasks();
-        taskManager.deleteSubtasks();
-        taskManager.printAllSubtask();
-        taskManager.deleteEpics();
-        taskManager.printAllEpics();
 
     }
 }
