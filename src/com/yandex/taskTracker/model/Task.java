@@ -1,3 +1,5 @@
+package com.yandex.taskTracker.model;
+
 import java.util.Objects;
 
 public class Task {
@@ -53,7 +55,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
+        return "com.yandex.taskTracker.model.Task{" +
                 "title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", id=" + id +

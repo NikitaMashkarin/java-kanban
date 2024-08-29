@@ -1,5 +1,9 @@
+package com.yandex.taskTracker.service;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.yandex.taskTracker.model.*;
 
 public class TaskManager {
 
