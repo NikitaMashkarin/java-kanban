@@ -5,7 +5,7 @@ import com.yandex.taskTracker.model.*;
 
 public class Main {
     public static void main (String[] args){
-        TaskManager taskManager = new TaskManager();
+        InMemoryTaskManager taskManager = new InMemoryTaskManager();
 
         Task washFloor = new Task("Помыть полы", "С новым средством");
         taskManager.addTask(washFloor);
@@ -30,6 +30,18 @@ public class Main {
         flatRenovationSubtask2.setStatus(StatusTask.DONE);
         taskManager.updateSubtask(flatRenovationSubtask2);
         System.out.println(flatRenovation);
+        taskManager.getTaskById(1);
+        taskManager.getEpicById(2);
+        taskManager.getSubtaskById(3);
+        taskManager.getTaskById(1);
+        taskManager.getEpicById(2);
+        taskManager.getSubtaskById(3);
+        taskManager.getTaskById(1);
+        taskManager.getEpicById(2);
+        taskManager.getSubtaskById(3);
+        taskManager.getSubtaskById(3);
+        taskManager.getTaskById(1);
+        System.out.println(taskManager.getHistory());
 
 
     }
