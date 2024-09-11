@@ -6,6 +6,7 @@ import com.yandex.taskTracker.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 
 public interface TaskManager {
     ArrayList<Task> getAllTasks();
@@ -47,4 +48,6 @@ public interface TaskManager {
     ArrayList<Subtask> getSubtaskCertainEpic(int id);
 
     List<Task> getHistory();
+
+    HashMap<Integer, Task> getTasks();
 }

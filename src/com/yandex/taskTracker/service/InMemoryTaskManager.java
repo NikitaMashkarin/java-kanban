@@ -151,6 +151,11 @@ public class InMemoryTaskManager implements  TaskManager{
         return historyManager.getHistory();
     }
 
+    @Override
+    public HashMap<Integer, Task> getTasks() {
+        return tasks;
+    }
+
     private void calculationStatusEpic(Epic epic) {
         int statusNew = 0;
         int statusDone = 0;
