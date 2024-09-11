@@ -5,6 +5,7 @@ import com.yandex.taskTracker.model.Subtask;
 import com.yandex.taskTracker.model.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskManager {
     ArrayList<Task> getAllTasks();
@@ -45,5 +46,5 @@ public interface TaskManager {
 
     ArrayList<Subtask> getSubtaskCertainEpic(int id);
 
-    ArrayList<Task> getHistory();
+    List<Task> getHistory();
 }

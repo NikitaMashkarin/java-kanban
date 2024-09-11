@@ -11,8 +11,8 @@ public class Main {
         taskManager.addTask(washFloor);
         System.out.println(washFloor);
 
-        Task washFloorToUpdate = new Task("Не забыть помыть полы", "Можно и без средства",washFloor.getId(),
-                StatusTask.IN_PROGRESS);
+        Task washFloorToUpdate = new Task("Не забыть помыть полы", "Можно и без средства",
+                washFloor.getId(), StatusTask.IN_PROGRESS);
         Task washFloorUpdated = taskManager.updateTask(washFloorToUpdate);
         System.out.println(washFloorUpdated);
 
@@ -22,7 +22,7 @@ public class Main {
         System.out.println(flatRenovation);
         Subtask flatRenovationSubtask1 = new Subtask("Поклеить обои", "Обязательно светлые!",
                 flatRenovation.getId());
-        Subtask flatRenovationSubtask2 = new Subtask("Установить новую технику", "Старую продать на Авито",
+        Subtask flatRenovationSubtask2 = new Subtask("Установить новую технику","Старую продать на Авито",
                 flatRenovation.getId());
         taskManager.addSubtask(flatRenovationSubtask1);
         taskManager.addSubtask(flatRenovationSubtask2);
@@ -30,19 +30,5 @@ public class Main {
         flatRenovationSubtask2.setStatus(StatusTask.DONE);
         taskManager.updateSubtask(flatRenovationSubtask2);
         System.out.println(flatRenovation);
-        taskManager.getTaskById(1);
-        taskManager.getEpicById(2);
-        taskManager.getSubtaskById(3);
-        taskManager.getTaskById(1);
-        taskManager.getEpicById(2);
-        taskManager.getSubtaskById(3);
-        taskManager.getTaskById(1);
-        taskManager.getEpicById(2);
-        taskManager.getSubtaskById(3);
-        taskManager.getSubtaskById(3);
-        taskManager.getTaskById(1);
-        System.out.println(taskManager.getHistory());
-
-
     }
 }
