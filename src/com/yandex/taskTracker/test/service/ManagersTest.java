@@ -7,12 +7,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ManagersTest {
     @Test
-    public void f() {
+    public void utilityClassAlwaysReturnsInitializedInstancesInMemoryTaskManager() {
         assertInstanceOf(InMemoryTaskManager.class, Managers.getDefault());
     }
 
     @Test
-    public void g() {
+    public void utilityClassAlwaysReturnsInitializedInstancesInMemoryHistoryManager() {
         assertInstanceOf(InMemoryHistoryManager.class, Managers.getDefaultHistory());
     }
 }
