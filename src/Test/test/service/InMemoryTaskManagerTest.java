@@ -1,4 +1,4 @@
-package com.yandex.taskTracker.test.service;
+package Test.test.service;
 
 import com.yandex.taskTracker.model.Epic;
 import com.yandex.taskTracker.model.StatusTask;

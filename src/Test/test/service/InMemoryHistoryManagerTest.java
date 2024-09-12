@@ -1,14 +1,10 @@
-package com.yandex.taskTracker.test.service;
+package Test.test.service;
 
-import com.yandex.taskTracker.model.Epic;
 import com.yandex.taskTracker.model.Task;
-import com.yandex.taskTracker.service.HistoryManager;
 import com.yandex.taskTracker.service.Managers;
 import com.yandex.taskTracker.service.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

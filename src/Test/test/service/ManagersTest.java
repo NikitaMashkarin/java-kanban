@@ -1,4 +1,4 @@
-package com.yandex.taskTracker.test.service;
+package Test.test.service;
 
 import com.yandex.taskTracker.service.*;
 import org.junit.jupiter.api.Test;
