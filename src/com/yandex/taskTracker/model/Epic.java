@@ -1,9 +1,10 @@
 package com.yandex.taskTracker.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task {
-    private ArrayList<Subtask> subtasks = new ArrayList<>();
+    final private List<Subtask> subtasks = new ArrayList<>();
 
     public Epic(String title, String description, int id, StatusTask status) {
         super(title, description, id, status);
@@ -21,12 +22,8 @@ public class Epic extends Task {
         subtasks.clear();
     }
 
-    public ArrayList<Subtask> getSubtasks() {
+    public List<Subtask> getSubtasks() {
         return subtasks;
-    }
-
-    public void setSubtasks(ArrayList<Subtask> subtasks) {
-        this.subtasks = subtasks;
     }
 
     @Override

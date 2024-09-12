@@ -4,16 +4,15 @@ import com.yandex.taskTracker.model.Epic;
 import com.yandex.taskTracker.model.Subtask;
 import com.yandex.taskTracker.model.Task;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 
 public interface TaskManager {
-    ArrayList<Task> getAllTasks();
+    List<Task> getAllTasks();
 
-    ArrayList<Epic> getAllEpics();
+    List<Epic> getAllEpics();
 
-    ArrayList<Subtask> getAllSubtask();
+    List<Subtask> getAllSubtask();
 
     void deleteTasks();
 
@@ -45,9 +44,7 @@ public interface TaskManager {
 
     void removeSubtaskById(int id);
 
-    ArrayList<Subtask> getSubtaskCertainEpic(int id);
+    List<Subtask> getSubtaskCertainEpic(int id);
 
     List<Task> getHistory();
-
-    HashMap<Integer, Task> getTasks();
 }

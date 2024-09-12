@@ -6,26 +6,27 @@ import com.yandex.taskTracker.model.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements  TaskManager{
     private int nextID = 1;
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, Subtask> subtasks = new HashMap<>();
     private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
-    public ArrayList<Task> getAllTasks () {
+    public List<Task> getAllTasks() {
         return new ArrayList<>(tasks.values());
     }
 
     @Override
-    public ArrayList<Epic> getAllEpics () {
+    public List<Epic> getAllEpics () {
         return new ArrayList<>(epics.values());
     }
 
     @Override
-    public ArrayList<Subtask> getAllSubtask() {
+    public List<Subtask> getAllSubtask() {
         return new ArrayList<>(subtasks.values());
     }
 
@@ -51,23 +52,32 @@ public class InMemoryTaskManager implements  TaskManager{
 
     @Override
     public Task getTaskById(int id) {
-        Task task = tasks.get(id);
-        historyManager.add(task);
-        return task;
+        if (tasks.containsKey(id)) {
+            Task task = tasks.get(id);
+            historyManager.add(task);
+            return task;
+        }
+        return null;
     }
 
     @Override
     public Epic getEpicById(int id) {
-        Epic epic = epics.get(id);
-        historyManager.add(epic);
-        return epic;
+        if (epics.containsKey(id)) {
+            Epic epic = epics.get(id);
+            historyManager.add(epic);
+            return epic;
+        }
+        return null;
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-        Subtask subtask = subtasks.get(id);
-        historyManager.add(subtask);
-        return subtask;
+        if (subtasks.containsKey(id)) {
+            Subtask subtask = subtasks.get(id);
+            historyManager.add(subtask);
+            return subtask;
+        }
+        return null;
     }
 
     @Override
@@ -112,7 +122,7 @@ public class InMemoryTaskManager implements  TaskManager{
         Subtask oldSubtask = subtasks.get(subtaskId);
         subtasks.put(subtaskId, subtask);
         Epic epic = epics.get(epicId);
-        ArrayList<Subtask> oldSubtasks = epic.getSubtasks();
+        List<Subtask> oldSubtasks = epic.getSubtasks();
         oldSubtasks.remove(oldSubtask);
         oldSubtasks.add(subtask);
         calculationStatusEpic(epic);
@@ -125,7 +135,7 @@ public class InMemoryTaskManager implements  TaskManager{
 
     @Override
     public void removeEpicById(int id) {
-        ArrayList<Subtask> epicSubtask = epics.remove(id).getSubtasks();
+        List<Subtask> epicSubtask = epics.remove(id).getSubtasks();
         for (Subtask subtask : epicSubtask) {
             subtasks.remove(subtask.getId());
         }
@@ -136,13 +146,13 @@ public class InMemoryTaskManager implements  TaskManager{
         Subtask subtask = subtasks.remove(id);
         int epicId = subtask.getEpicId();
         Epic epic = epics.get(epicId);
-        ArrayList<Subtask> subtaskArrayList = epic.getSubtasks();
-        subtaskArrayList.remove(subtask);
+        List<Subtask> subtaskList = epic.getSubtasks();
+        subtaskList.remove(subtask);
         calculationStatusEpic(epic);
     }
 
     @Override
-    public ArrayList<Subtask> getSubtaskCertainEpic(int id) {
+    public List<Subtask> getSubtaskCertainEpic(int id) {
         return new ArrayList<>(epics.get(id).getSubtasks());
     }
 
@@ -151,16 +161,11 @@ public class InMemoryTaskManager implements  TaskManager{
         return historyManager.getHistory();
     }
 
-    @Override
-    public HashMap<Integer, Task> getTasks() {
-        return tasks;
-    }
-
     private void calculationStatusEpic(Epic epic) {
         int statusNew = 0;
         int statusDone = 0;
 
-        ArrayList<Subtask> subtasks = epic.getSubtasks();
+          List<Subtask> subtasks = epic.getSubtasks();
         for (Subtask subtask : subtasks) {
             final StatusTask status = subtask.getStatus();
             if (status == StatusTask.NEW) {

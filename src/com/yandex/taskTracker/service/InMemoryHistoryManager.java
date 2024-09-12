@@ -2,15 +2,17 @@ package com.yandex.taskTracker.service;
 
 import com.yandex.taskTracker.model.Task;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager{
-    List<Task> history = new ArrayList<>();
+    final private static int maxSizeHistory = 10;
+    private List<Task> history = new LinkedList<>();
 
     @Override
     public void add(Task task) {
-        if (history.size() >= 10){
+        if (history.size() >= maxSizeHistory){
             history.remove(0);
         }
         history.add(task);
@@ -18,7 +20,7 @@ public class InMemoryHistoryManager implements HistoryManager{
 
     @Override
     public List<Task> getHistory(){
-        return history;
+        return new LinkedList<>(history);
     }
 
 }
