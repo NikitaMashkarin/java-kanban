@@ -43,13 +43,22 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void s(){
+    public void removMethodRemovesTaskFromHistory(){
+        Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
+        Epic flatRenovation1 = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
+        taskManager.addEpic(flatRenovation);
+        taskManager.addEpic(flatRenovation1);
+        taskManager.getEpicById(1);
+        taskManager.getEpicById(2);
+        taskManager.removeHistory(2);
+        assertEquals(taskManager.getHistory().size(), 1);
+    }
+
+    @Test
+    public void addMethodAddsTaskFromHistory(){
         Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
         taskManager.addEpic(flatRenovation);
-        Subtask flatRenovationSubtask1 = new Subtask("Поклеить обои", "Обязательно светлые!",
-                flatRenovation.getId());
-        Subtask flatRenovationSubtask2 = new Subtask("Установить новую технику","Старую продать на Авито",
-                flatRenovation.getId());
-
+        taskManager.getEpicById(1);
+        assertEquals(taskManager.getHistory().size(), 1);
     }
 }
