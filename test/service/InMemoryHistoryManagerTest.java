@@ -1,5 +1,7 @@
 package service;
 
+import com.yandex.taskTracker.model.Epic;
+import com.yandex.taskTracker.model.Subtask;
 import com.yandex.taskTracker.model.Task;
 import com.yandex.taskTracker.service.Managers;
 import com.yandex.taskTracker.service.TaskManager;
@@ -31,12 +33,32 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void theSizeOfTheHistoryShouldBeLimitedTo10Items() {
+    public void theHistoryCannotSaveDuplicates() {
         Task task = new Task("Name", "Description");
         taskManager.addTask(task);
         for (int i = 0; i <= 15; i++) {
             taskManager.getTaskById(1);
         }
-        assertEquals(taskManager.getHistory().size(), 10);
+        assertEquals(taskManager.getHistory().size(), 1);
+    }
+
+    @Test
+    public void removMethodRemovesTaskFromHistory(){
+        Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
+        Epic flatRenovation1 = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
+        taskManager.addEpic(flatRenovation);
+        taskManager.addEpic(flatRenovation1);
+        taskManager.getEpicById(1);
+        taskManager.getEpicById(2);
+        taskManager.removeHistory(2);
+        assertEquals(taskManager.getHistory().size(), 1);
+    }
+
+    @Test
+    public void addMethodAddsTaskFromHistory(){
+        Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
+        taskManager.addEpic(flatRenovation);
+        taskManager.getEpicById(1);
+        assertEquals(taskManager.getHistory().size(), 1);
     }
 }

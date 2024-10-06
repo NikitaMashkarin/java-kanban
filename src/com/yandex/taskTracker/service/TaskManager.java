@@ -4,8 +4,7 @@ import com.yandex.taskTracker.model.Epic;
 import com.yandex.taskTracker.model.Subtask;
 import com.yandex.taskTracker.model.Task;
 
-import java.util.List;
-import java.util.HashMap;
+import java.util.*;
 
 public interface TaskManager {
     List<Task> getAllTasks();
@@ -47,4 +46,6 @@ public interface TaskManager {
     List<Subtask> getSubtaskCertainEpic(int id);
 
     List<Task> getHistory();
+
+    void removeHistory(int id);
 }

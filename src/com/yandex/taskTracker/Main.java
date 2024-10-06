@@ -32,15 +32,13 @@ public class Main {
         System.out.println(flatRenovation);
         taskManager.getTaskById(1);
         taskManager.getEpicById(2);
-        taskManager.getSubtaskById(3);
-        taskManager.getTaskById(1);
-        taskManager.getEpicById(2);
-        taskManager.getSubtaskById(3);
-        taskManager.getTaskById(1);
+
         taskManager.getEpicById(2);
         taskManager.getSubtaskById(3);
         taskManager.getSubtaskById(3);
         taskManager.getTaskById(1);
+
         System.out.println(taskManager.getHistory());
+        System.out.println(taskManager.getHistory().size());
     }
 }

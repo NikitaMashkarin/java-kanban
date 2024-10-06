@@ -3,10 +3,7 @@ package com.yandex.taskTracker.service;
 import com.yandex.taskTracker.model.*;
 import com.yandex.taskTracker.model.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryTaskManager implements  TaskManager{
     private int nextID = 1;
@@ -156,6 +153,11 @@ public class InMemoryTaskManager implements  TaskManager{
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    @Override
+    public void removeHistory(int id){
+        historyManager.remove(id);
     }
 
     private void calculationStatusEpic(Epic epic) {
