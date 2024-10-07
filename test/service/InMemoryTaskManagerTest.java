@@ -7,6 +7,7 @@ import com.yandex.taskTracker.model.Task;
 import com.yandex.taskTracker.service.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import java.util.*;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,4 +70,64 @@ class InMemoryTaskManagerTest {
         assertEquals(task.getId(), task1.getId());
         assertEquals(task.getStatus(), task1.getStatus());
     }
+
+    @Test
+    public void shouldNotKeepOldIdAfterSubtaskIsDeleted() {
+        InMemoryTaskManager taskManager = new InMemoryTaskManager();
+        Epic epic = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic);
+        Subtask subtask = new Subtask("Subtask1", "Subtask description", epic.getId());
+        taskManager.addSubtask(subtask);
+        taskManager.removeSubtaskById(subtask.getId());
+        assertNull(taskManager.getSubtaskById(subtask.getId()));
+        assertFalse(taskManager.getAllSubtask().contains(subtask));
+    }
+
+    @Test
+    public void shouldNotKeepNonActualSubtaskIdsInEpic() {
+        InMemoryTaskManager taskManager = new InMemoryTaskManager();
+        Epic epic = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic);
+        Subtask subtask1 = new Subtask("Subtask1", "Subtask description", epic.getId());
+        Subtask subtask2 = new Subtask("Subtask2", "Subtask description", epic.getId());
+        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2);
+        taskManager.removeSubtaskById(subtask1.getId());
+        List<Subtask> subtasksInEpic = taskManager.getSubtaskCertainEpic(epic.getId());
+        assertEquals(1, subtasksInEpic.size());
+        assertTrue(subtasksInEpic.contains(subtask2));
+        assertFalse(subtasksInEpic.contains(subtask1));
+    }
+
+    @Test
+    public void shouldUpdateTaskFieldsAndReflectInManager() {
+        InMemoryTaskManager taskManager = new InMemoryTaskManager();
+        Task task = new Task("Task1", "Task description");
+        taskManager.addTask(task);
+        task.setTitle("Updated Task");
+        task.setDescription("Updated description");
+        task.setStatus(StatusTask.DONE);
+        Task updatedTask = taskManager.getTaskById(task.getId());
+        assertEquals("Updated Task", updatedTask.getTitle());
+        assertEquals("Updated description", updatedTask.getDescription());
+        assertEquals(StatusTask.DONE, updatedTask.getStatus());
+    }
+
+    @Test
+    public void shouldUpdateEpicAndPreserveSubtasks() {
+        InMemoryTaskManager taskManager = new InMemoryTaskManager();
+        Epic epic = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic);
+        Subtask subtask = new Subtask("Subtask1", "Subtask description", epic.getId());
+        taskManager.addSubtask(subtask);
+        epic.setTitle("Updated Epic");
+        epic.setDescription("Updated description");
+        Epic updatedEpic = taskManager.getEpicById(epic.getId());
+        assertEquals("Updated Epic", updatedEpic.getTitle());
+        assertEquals("Updated description", updatedEpic.getDescription());
+        List<Subtask> subtasksInEpic = taskManager.getSubtaskCertainEpic(epic.getId());
+        assertEquals(1, subtasksInEpic.size());
+        assertTrue(subtasksInEpic.contains(subtask));
+    }
+
 }
