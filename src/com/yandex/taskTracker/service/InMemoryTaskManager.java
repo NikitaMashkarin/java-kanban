@@ -150,6 +150,16 @@ public class InMemoryTaskManager implements  TaskManager{
         return new ArrayList<>(epics.get(id).getSubtasks());
     }
 
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
+    @Override
+    public void removeHistory(int id){
+        historyManager.remove(id);
+    }
+
     private void calculationStatusEpic(Epic epic) {
         int statusNew = 0;
         int statusDone = 0;
