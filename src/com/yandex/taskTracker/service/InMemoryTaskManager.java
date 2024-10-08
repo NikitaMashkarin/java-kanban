@@ -5,7 +5,7 @@ import com.yandex.taskTracker.model.Task;
 
 import java.util.*;
 
-public class InMemoryTaskManager implements  TaskManager {
+public class InMemoryTaskManager implements TaskManager {
     private int nextID = 1;
     private final Map<Integer, Task> tasks = new HashMap<>();
     private final Map<Integer, Epic> epics = new HashMap<>();
@@ -164,7 +164,7 @@ public class InMemoryTaskManager implements  TaskManager {
         int statusNew = 0;
         int statusDone = 0;
 
-          List<Subtask> subtasks = epic.getSubtasks();
+        List<Subtask> subtasks = epic.getSubtasks();
         for (Subtask subtask : subtasks) {
             final StatusTask status = subtask.getStatus();
             if (status == StatusTask.NEW) {

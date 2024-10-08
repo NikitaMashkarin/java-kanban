@@ -17,6 +17,7 @@ class InMemoryHistoryManagerTest {
     public void beforeEach() {
         taskManager = Managers.getDefault();
     }
+
     @Test
     public void tasksAddedToTheHistoryManagerRetainItsPreviousVersion() {
         Task task = new Task("Name", "Description");
@@ -43,7 +44,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removMethodRemovesTaskFromHistory(){
+    public void removMethodRemovesTaskFromHistory() {
         Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
         Epic flatRenovation1 = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
         taskManager.addEpic(flatRenovation);
@@ -55,7 +56,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void addMethodAddsTaskFromHistory(){
+    public void addMethodAddsTaskFromHistory() {
         Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
         taskManager.addEpic(flatRenovation);
         taskManager.getEpicById(1);
