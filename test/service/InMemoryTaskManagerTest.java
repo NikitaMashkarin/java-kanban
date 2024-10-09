@@ -23,7 +23,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void anEpikCannotBeAddedToItselfAsASubtask() {
+    public void epikCannotBeAddedToItselfAsASubtask() {
         Epic epic = new Epic("Name", "Description");
         Subtask subtask = new Subtask("Name", "Description", 1, StatusTask.NEW, 1);
         assertDoesNotThrow(() -> {
