@@ -3,10 +3,14 @@ package service;
 import com.yandex.taskTracker.model.Epic;
 import com.yandex.taskTracker.model.Subtask;
 import com.yandex.taskTracker.model.Task;
+import com.yandex.taskTracker.service.InMemoryHistoryManager;
 import com.yandex.taskTracker.service.Managers;
 import com.yandex.taskTracker.service.TaskManager;
+import com.yandex.taskTracker.service.HistoryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,14 +48,14 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removMethodRemovesTaskFromHistory() {
+    public void removeMethodRemovesTaskFromHistory() {
         Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
         Epic flatRenovation1 = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
         taskManager.addEpic(flatRenovation);
         taskManager.addEpic(flatRenovation1);
         taskManager.getEpicById(1);
         taskManager.getEpicById(2);
-        taskManager.removeHistory(2);
+        taskManager.removeHistory(1);
         assertEquals(taskManager.getHistory().size(), 1);
     }
 

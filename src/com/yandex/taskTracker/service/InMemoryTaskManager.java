@@ -151,13 +151,13 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public List<Task> getHistory() {
-        return historyManager.getHistory();
+    public void removeHistory(int id) {
+        historyManager.remove(id);
     }
 
     @Override
-    public void removeHistory(int id) {
-        historyManager.remove(id);
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 
     private void calculationStatusEpic(Epic epic) {
