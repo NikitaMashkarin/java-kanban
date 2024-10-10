@@ -5,7 +5,7 @@ import com.yandex.taskTracker.model.Task;
 
 import java.util.*;
 
-public class InMemoryTaskManager implements  TaskManager{
+public class InMemoryTaskManager implements TaskManager {
     private int nextID = 1;
     private final Map<Integer, Task> tasks = new HashMap<>();
     private final Map<Integer, Epic> epics = new HashMap<>();
@@ -18,7 +18,7 @@ public class InMemoryTaskManager implements  TaskManager{
     }
 
     @Override
-    public List<Epic> getAllEpics () {
+    public List<Epic> getAllEpics() {
         return new ArrayList<>(epics.values());
     }
 
@@ -75,19 +75,19 @@ public class InMemoryTaskManager implements  TaskManager{
     }
 
     @Override
-    public void addTask(Task task){
+    public void addTask(Task task) {
         task.setId(getNextID());
         tasks.put(task.getId(), task);
     }
 
     @Override
-    public void addEpic(Epic epic){
+    public void addEpic(Epic epic) {
         epic.setId(getNextID());
         epics.put(epic.getId(), epic);
     }
 
     @Override
-    public void addSubtask(Subtask subtask){
+    public void addSubtask(Subtask subtask) {
         subtask.setId(getNextID());
         Epic epic = epics.get(subtask.getEpicId());
         epic.addSubtask(subtask);
@@ -150,11 +150,16 @@ public class InMemoryTaskManager implements  TaskManager{
         return new ArrayList<>(epics.get(id).getSubtasks());
     }
 
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
     private void calculationStatusEpic(Epic epic) {
         int statusNew = 0;
         int statusDone = 0;
 
-          List<Subtask> subtasks = epic.getSubtasks();
+        List<Subtask> subtasks = epic.getSubtasks();
         for (Subtask subtask : subtasks) {
             final StatusTask status = subtask.getStatus();
             if (status == StatusTask.NEW) {

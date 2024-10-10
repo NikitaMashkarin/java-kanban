@@ -7,6 +7,7 @@ import com.yandex.taskTracker.model.Task;
 import com.yandex.taskTracker.service.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+
 import java.util.*;
 
 
@@ -22,7 +23,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void anEpikCannotBeAddedToItselfAsASubtask() {
+    public void epikCannotBeAddedToItselfAsASubtask() {
         Epic epic = new Epic("Name", "Description");
         Subtask subtask = new Subtask("Name", "Description", 1, StatusTask.NEW, 1);
         assertDoesNotThrow(() -> {
