@@ -45,15 +45,13 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     private void linkLast(Task task) {
-        final Node oldTail = tail;
         final Node newNode = new Node(tail, task, null);
-        tail = newNode;
-        if (oldTail == null) {
+        if (tail == null) {
             head = newNode;
         } else {
-            oldTail.next = newNode;
-            newNode.prev = oldTail;
+            tail.next = newNode;
         }
+        tail = newNode;
         history.put(task.getId(), newNode);
     }
 
