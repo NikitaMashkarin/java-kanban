@@ -1,7 +1,7 @@
 package com.yandex.taskTracker.service;
 
 public class Managers {
-    public static InMemoryTaskManager getDefault(){
+    public static InMemoryTaskManager getDefault() {
         return new InMemoryTaskManager();
     }
 

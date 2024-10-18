@@ -3,10 +3,14 @@ package service;
 import com.yandex.taskTracker.model.Epic;
 import com.yandex.taskTracker.model.Subtask;
 import com.yandex.taskTracker.model.Task;
+import com.yandex.taskTracker.service.InMemoryHistoryManager;
 import com.yandex.taskTracker.service.Managers;
 import com.yandex.taskTracker.service.TaskManager;
+import com.yandex.taskTracker.service.HistoryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,6 +21,7 @@ class InMemoryHistoryManagerTest {
     public void beforeEach() {
         taskManager = Managers.getDefault();
     }
+
     @Test
     public void tasksAddedToTheHistoryManagerRetainItsPreviousVersion() {
         Task task = new Task("Name", "Description");
@@ -43,19 +48,17 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removMethodRemovesTaskFromHistory(){
-        Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
-        Epic flatRenovation1 = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
-        taskManager.addEpic(flatRenovation);
-        taskManager.addEpic(flatRenovation1);
-        taskManager.getEpicById(1);
-        taskManager.getEpicById(2);
-        taskManager.removeHistory(2);
-        assertEquals(taskManager.getHistory().size(), 1);
+    public void removeMethodRemovesTaskFromHistory() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        Task flatRenovation = new Task("Сделать ремонт", "Нужно успеть за отпуск");
+        taskManager.addTask(flatRenovation);
+        historyManager.add(flatRenovation);
+        historyManager.remove(flatRenovation.getId());
+        assertEquals( taskManager.getHistory().size(), 0);
     }
 
     @Test
-    public void addMethodAddsTaskFromHistory(){
+    public void addMethodAddsTaskFromHistory() {
         Epic flatRenovation = new Epic("Сделать ремонт", "Нужно успеть за отпуск");
         taskManager.addEpic(flatRenovation);
         taskManager.getEpicById(1);

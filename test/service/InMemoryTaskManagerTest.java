@@ -7,6 +7,7 @@ import com.yandex.taskTracker.model.Task;
 import com.yandex.taskTracker.service.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+
 import java.util.*;
 
 
@@ -22,7 +23,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void anEpikCannotBeAddedToItselfAsASubtask() {
+    public void epikCannotBeAddedToItselfAsASubtask() {
         Epic epic = new Epic("Name", "Description");
         Subtask subtask = new Subtask("Name", "Description", 1, StatusTask.NEW, 1);
         assertDoesNotThrow(() -> {
@@ -73,7 +74,6 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void shouldNotKeepOldIdAfterSubtaskIsDeleted() {
-        InMemoryTaskManager taskManager = new InMemoryTaskManager();
         Epic epic = new Epic("Epic1", "Epic description");
         taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Subtask1", "Subtask description", epic.getId());
@@ -85,7 +85,6 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void shouldNotKeepNonActualSubtaskIdsInEpic() {
-        InMemoryTaskManager taskManager = new InMemoryTaskManager();
         Epic epic = new Epic("Epic1", "Epic description");
         taskManager.addEpic(epic);
         Subtask subtask1 = new Subtask("Subtask1", "Subtask description", epic.getId());
@@ -101,7 +100,6 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void shouldUpdateTaskFieldsAndReflectInManager() {
-        InMemoryTaskManager taskManager = new InMemoryTaskManager();
         Task task = new Task("Task1", "Task description");
         taskManager.addTask(task);
         task.setTitle("Updated Task");
@@ -115,7 +113,6 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void shouldUpdateEpicAndPreserveSubtasks() {
-        InMemoryTaskManager taskManager = new InMemoryTaskManager();
         Epic epic = new Epic("Epic1", "Epic description");
         taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Subtask1", "Subtask description", epic.getId());
@@ -130,4 +127,100 @@ class InMemoryTaskManagerTest {
         assertTrue(subtasksInEpic.contains(subtask));
     }
 
+    @Test
+    public void byDeletingTaskItIsDeletedFromHistory(){
+        Task task = new Task("Task1", "Task description");
+        taskManager.addTask(task);
+        taskManager.getTaskById(task.getId());
+        taskManager.removeTaskById(task.getId());
+        assertEquals(taskManager.getHistory().size(), 0);
+    }
+
+    @Test
+    public void byDeletingEpicItIsDeletedFromHistory() {
+        Epic epic = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic);
+        taskManager.getEpicById(epic.getId());
+        taskManager.removeEpicById(epic.getId());
+        assertEquals(taskManager.getHistory().size(), 0);
+    }
+
+    @Test
+    public void byDeletingEpicsWithSubtasksItIsDeletedFromHistory(){
+        Epic epic = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic);
+        Subtask subtask = new Subtask("Subtask1", "Subtask description", epic.getId());
+        taskManager.addSubtask(subtask);
+        taskManager.getEpicById(epic.getId());
+        taskManager.getSubtaskById(subtask.getId());
+        taskManager.removeEpicById(epic.getId());
+        assertEquals(taskManager.getHistory().size(), 0);
+    }
+
+    @Test
+    public void byDeletingSubtaskItIsDeletedFromHistory(){
+        Epic epic = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic);
+        Subtask subtask = new Subtask("Subtask1", "Subtask description", epic.getId());
+        taskManager.addSubtask(subtask);
+        taskManager.getSubtaskById(subtask.getId());
+        taskManager.removeSubtaskById(subtask.getId());
+        assertEquals(taskManager.getHistory().size(), 0);
+    }
+
+    @Test
+    public void byDeletingAllTasksTheyAreDeletedFromTheHistory(){
+        Task task = new Task("Task1", "Task description");
+        taskManager.addTask(task);
+        taskManager.getTaskById(task.getId());
+        Task task1 = new Task("Task1", "Task description");
+        taskManager.addTask(task1);
+        taskManager.getTaskById(task1.getId());
+        taskManager.deleteTasks();
+        assertEquals(taskManager.getHistory().size(), 0);
+    }
+
+    @Test
+    public void byDeletingAllEpicsTheyAreDeletedFromTheHistory(){
+        Epic epic = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic);
+        taskManager.getEpicById(epic.getId());
+        Epic epic1 = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic1);
+        taskManager.getEpicById(epic1.getId());
+        taskManager.deleteEpics();
+        assertEquals(taskManager.getHistory().size(), 0);
+    }
+
+    @Test
+    public void byDeletingAllEpicsWithSubtasksTheyAreDeletedFromTheHistory(){
+        Epic epic = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic);
+        Subtask subtask = new Subtask("Subtask1", "Subtask description", epic.getId());
+        taskManager.addSubtask(subtask);
+        taskManager.getEpicById(epic.getId());
+        taskManager.getSubtaskById(subtask.getId());
+        Epic epic1 = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic1);
+        Subtask subtask1 = new Subtask("Subtask1", "Subtask description", epic1.getId());
+        taskManager.addSubtask(subtask1);
+        taskManager.getEpicById(epic1.getId());
+        taskManager.getSubtaskById(subtask1.getId());
+        taskManager.deleteEpics();
+        assertEquals(taskManager.getHistory().size(), 0);
+    }
+
+    @Test
+    public void byDeletingAllSubtasksTheyAreDeletedFromTheHistory(){
+        Epic epic = new Epic("Epic1", "Epic description");
+        taskManager.addEpic(epic);
+        Subtask subtask = new Subtask("Subtask1", "Subtask description", epic.getId());
+        Subtask subtask1 = new Subtask("Subtask1", "Subtask description", epic.getId());
+        taskManager.addSubtask(subtask);
+        taskManager.getSubtaskById(subtask.getId());
+        taskManager.addSubtask(subtask1);
+        taskManager.getSubtaskById(subtask1.getId());
+        taskManager.deleteSubtasks();
+        assertEquals(taskManager.getHistory().size(), 0);
+    }
 }
