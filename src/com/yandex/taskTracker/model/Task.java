@@ -37,6 +37,10 @@ public class Task {
         return status;
     }
 
+    public Integer getEpicId(){
+        return null;
+    }
+
     public void setStatus(StatusTask status) {
         this.status = status;
     }
