@@ -17,7 +17,8 @@ public class Task {
 
     public Task(String title, String description) {
         this.title = title;
-        this.description = description;;
+        this.description = description;
+        ;
         this.status = StatusTask.NEW;
     }
 
@@ -37,7 +38,7 @@ public class Task {
         return status;
     }
 
-    public Integer getEpicId(){
+    public Integer getEpicId() {
         return null;
     }
 
