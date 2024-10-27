@@ -30,6 +30,7 @@ public class Epic extends Task {
     public TypeTask getType() {
         return TypeTask.EPIC;
     }
+
     @Override
     public String toString() {
         return "com.yandex.taskTracker.model.Epic{" +
