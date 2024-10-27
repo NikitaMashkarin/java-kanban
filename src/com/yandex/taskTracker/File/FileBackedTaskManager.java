@@ -2,6 +2,8 @@ package com.yandex.taskTracker.File;
 
 import com.yandex.taskTracker.model.*;
 import com.yandex.taskTracker.service.InMemoryTaskManager;
+import com.yandex.taskTracker.service.Managers;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -89,62 +91,70 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
-
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                Task task = fromString(line);
-                if (task != null) {
-                    if (task instanceof Epic epic) {
-                        fileBackedTaskManager.addEpic(epic);
-                    } else if (task instanceof Subtask subtask) {
-                        fileBackedTaskManager.addSubtask(subtask);
-                    } else {
-                        fileBackedTaskManager.addTask(task);
+        try {
+            FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
+            InMemoryTaskManager taskManager = Managers.getDefault();
+            try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    Task task = fromString(line);
+                    if (task != null) {
+                        if (task.getType().equals(TypeTask.EPIC)) {
+                            Epic epic = new Epic(task.getTitle(), task.getDescription(), task.getId(), task.getStatus());
+                            taskManager.getEpics().put(task.getId(), epic);
+                        } else if (task.getType().equals(TypeTask.SUBTASK)) {
+                            Subtask subtask = new Subtask(task.getTitle(), task.getDescription(), task.getId()
+                                    , task.getStatus(), task.getEpicId());
+                            taskManager.getSubtasks().put(task.getId(), subtask);
+                        } else {
+                            taskManager.getTasks().put(task.getId(), task);
+                        }
                     }
                 }
+            } catch (IOException e) {
+                System.out.println("Произошла ошибка при чтении файла: " + e.getMessage());
             }
-        } catch (IOException e) {
-            System.out.println("Произошла ошибка при чтении файла: " + e.getMessage());
-        }
 
-        return fileBackedTaskManager;
+            return fileBackedTaskManager;
+        } catch (ManagerSaveException e) {
+            System.out.println("Некорректный файл");
+        }
+        return null;
     }
 
     private static Task fromString(String value) {
         String[] tasksArray = value.split(",");
         Task task;
-        StatusTask status;
+        String statusStr = tasksArray[3];
 
-        switch (tasksArray[3]) {
-            case "NEW":
-                status = StatusTask.NEW;
-                break;
-            case "IN_PROGRESS":
-                status = StatusTask.IN_PROGRESS;
-                break;
-            case "DONE":
-                status = StatusTask.DONE;
-                break;
-            default:
-                status = null;
-                break;
+        if (statusStr.equals("status")) {
+            return null;
         }
 
-        switch (tasksArray[1]) {
-            case "TASK" -> {
-                task = new Task(tasksArray[2], tasksArray[4], Integer.parseInt(tasksArray[0]), status);
+        StatusTask status = StatusTask.valueOf(statusStr);
+
+        String typeTaskStr = tasksArray[1];
+
+        if (statusStr.equals("type")) {
+            return null;
+        }
+
+        TypeTask typeTask = TypeTask.valueOf(typeTaskStr);
+        String name = tasksArray[2];
+        String description = tasksArray[4];
+        int id = Integer.parseInt(tasksArray[0]);
+        int epicId = Integer.parseInt(tasksArray[5]);
+        switch (typeTask) {
+            case TypeTask.TASK -> {
+                task = new Task(name, description, id, status);
                 return task;
             }
-            case "EPIC" -> {
-                task = new Epic(tasksArray[2], tasksArray[4], Integer.parseInt(tasksArray[0]), status);
+            case TypeTask.EPIC -> {
+                task = new Epic(name, description, id, status);
                 return task;
             }
-            case "SUBTASK" -> {
-                task = new Subtask(tasksArray[2], tasksArray[4], Integer.parseInt(tasksArray[0]), status,
-                        Integer.parseInt(tasksArray[5]));
+            case TypeTask.SUBTASK -> {
+                task = new Subtask(name, description, id, status, epicId);
                 return task;
             }
         }

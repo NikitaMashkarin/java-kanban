@@ -18,7 +18,6 @@ public class Task {
     public Task(String title, String description) {
         this.title = title;
         this.description = description;
-        ;
         this.status = StatusTask.NEW;
     }
 
@@ -56,6 +55,10 @@ public class Task {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public TypeTask getType() {
+        return TypeTask.TASK;
     }
 
     @Override

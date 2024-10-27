@@ -2,6 +2,7 @@ package File;
 
 import com.yandex.taskTracker.File.FileBackedTaskManager;
 import com.yandex.taskTracker.model.*;
+import com.yandex.taskTracker.service.InMemoryTaskManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -9,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTaskManagerTest {
+class FileBackedTaskManagerTest extends InMemoryTaskManager {
     private FileBackedTaskManager fileManager;
     private File file;
 
