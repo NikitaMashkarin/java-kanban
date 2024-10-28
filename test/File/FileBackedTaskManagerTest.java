@@ -1,6 +1,6 @@
 package File;
 
-import com.yandex.taskTracker.File.FileBackedTaskManager;
+import com.yandex.taskTracker.service.FileBackedTaskManager;
 import com.yandex.taskTracker.model.*;
 import com.yandex.taskTracker.service.InMemoryTaskManager;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ class FileBackedTaskManagerTest extends InMemoryTaskManager {
                 + epic1.getDescription() + "," + epic1.getEpicId();
         try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             String line;
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 3; i++) {
                 line = br.readLine();
                 if (i == 1) {
                     assertEquals(taskStr, line);

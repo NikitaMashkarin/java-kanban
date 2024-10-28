@@ -1,8 +1,7 @@
-package com.yandex.taskTracker.File;
+package com.yandex.taskTracker.service;
 
+import com.yandex.taskTracker.exception.ManagerSaveException;
 import com.yandex.taskTracker.model.*;
-import com.yandex.taskTracker.service.InMemoryTaskManager;
-import com.yandex.taskTracker.service.Managers;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -90,36 +89,60 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    public static FileBackedTaskManager loadFromFile(File file) {
+    public static FileBackedTaskManager loadFromFile(File file) throws ManagerSaveException {
         try {
             FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
             InMemoryTaskManager taskManager = Managers.getDefault();
+
             try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     Task task = fromString(line);
                     if (task != null) {
                         if (task.getType().equals(TypeTask.EPIC)) {
-                            Epic epic = new Epic(task.getTitle(), task.getDescription(), task.getId(), task.getStatus());
-                            taskManager.getEpics().put(task.getId(), epic);
+                            taskManager.getEpics().put(task.getId(), (Epic) task);
                         } else if (task.getType().equals(TypeTask.SUBTASK)) {
-                            Subtask subtask = new Subtask(task.getTitle(), task.getDescription(), task.getId(),
-                                    task.getStatus(), task.getEpicId());
-                            taskManager.getSubtasks().put(task.getId(), subtask);
+                            taskManager.getSubtasks().put(task.getId(), (Subtask) task);
                         } else {
                             taskManager.getTasks().put(task.getId(), task);
                         }
                     }
                 }
+                taskManager.setNextID(getMaxId(taskManager));
             } catch (IOException e) {
-                System.out.println("Произошла ошибка при чтении файла: " + e.getMessage());
+                throw new ManagerSaveException("Произошла ошибка при чтении файла: " + e.getMessage(), e);
             }
 
             return fileBackedTaskManager;
         } catch (ManagerSaveException e) {
-            System.out.println("Некорректный файл");
+            throw new ManagerSaveException("Некорректный файл: " + e.getMessage(), e);
         }
-        return null;
+    }
+
+    private static int getMaxId(InMemoryTaskManager taskManager) {
+        int id = 0;
+
+        for (Task task : taskManager.getAllTasks()) {
+            int idTask = task.getId();
+            if (idTask > id) {
+                id = idTask;
+            }
+        }
+
+        for (Epic epic : taskManager.getAllEpics()) {
+            int idEpic = epic.getId();
+            if (idEpic > id) {
+                id = idEpic;
+            }
+        }
+
+        for (Subtask subtask : taskManager.getAllSubtask()) {
+            int idSubtask = subtask.getId();
+            if (idSubtask > id) {
+                id = idSubtask;
+            }
+        }
+        return id;
     }
 
     private static Task fromString(String value) {
@@ -127,17 +150,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Task task;
         String statusStr = tasksArray[3];
 
-        if (statusStr.equals("status")) {
-            return null;
-        }
+//        if (statusStr.equals("status")) {
+//            return null;
+//        }
 
         StatusTask status = StatusTask.valueOf(statusStr);
 
         String typeTaskStr = tasksArray[1];
 
-        if (statusStr.equals("type")) {
-            return null;
-        }
+//        if (statusStr.equals("type")) {
+//            return null;
+//        }
 
         TypeTask typeTask = TypeTask.valueOf(typeTaskStr);
         String name = tasksArray[2];
