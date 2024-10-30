@@ -1,4 +1,4 @@
-package File;
+package service;
 
 import com.yandex.taskTracker.service.FileBackedTaskManager;
 import com.yandex.taskTracker.model.*;
@@ -13,6 +13,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class FileBackedTaskManagerTest extends InMemoryTaskManager {
     private FileBackedTaskManager fileManager;
     private File file;
+    private InMemoryTaskManager taskManager;
+
+    @BeforeEach
+    public void init(){
+        taskManager = Managers.getDefault();
+    }
 
     @Test
     public void tasksIsSavedToAFile() throws IOException {

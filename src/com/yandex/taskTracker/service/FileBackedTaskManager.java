@@ -96,8 +96,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
                 String line;
+                int id = 1;
                 while ((line = br.readLine()) != null) {
                     Task task = fromString(line);
+
+                    int idTask = task.getId();
+                    if (idTask > id) {
+                        id = idTask;
+                    }
+
                     if (task != null) {
                         if (task.getType().equals(TypeTask.EPIC)) {
                             taskManager.getEpics().put(task.getId(), (Epic) task);
@@ -108,7 +115,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         }
                     }
                 }
-                taskManager.setNextID(getMaxId(taskManager));
+                taskManager.setNextID(id);
             } catch (IOException e) {
                 throw new ManagerSaveException("Произошла ошибка при чтении файла: " + e.getMessage(), e);
             }
@@ -119,48 +126,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private static int getMaxId(InMemoryTaskManager taskManager) {
-        int id = 0;
-
-        for (Task task : taskManager.getAllTasks()) {
-            int idTask = task.getId();
-            if (idTask > id) {
-                id = idTask;
-            }
-        }
-
-        for (Epic epic : taskManager.getAllEpics()) {
-            int idEpic = epic.getId();
-            if (idEpic > id) {
-                id = idEpic;
-            }
-        }
-
-        for (Subtask subtask : taskManager.getAllSubtask()) {
-            int idSubtask = subtask.getId();
-            if (idSubtask > id) {
-                id = idSubtask;
-            }
-        }
-        return id;
-    }
-
     private static Task fromString(String value) {
         String[] tasksArray = value.split(",");
         Task task;
         String statusStr = tasksArray[3];
 
-//        if (statusStr.equals("status")) {
-//            return null;
-//        }
-
         StatusTask status = StatusTask.valueOf(statusStr);
 
         String typeTaskStr = tasksArray[1];
-
-//        if (statusStr.equals("type")) {
-//            return null;
-//        }
 
         TypeTask typeTask = TypeTask.valueOf(typeTaskStr);
         String name = tasksArray[2];
