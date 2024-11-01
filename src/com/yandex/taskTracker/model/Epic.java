@@ -1,10 +1,17 @@
 package com.yandex.taskTracker.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
     private final List<Subtask> subtasks = new ArrayList<>();
+
+    public Epic(String title, String description, int id, StatusTask status, Duration duration,
+                LocalDateTime startTime) {
+        super(title, description, id, status, duration, startTime);
+    }
 
     public Epic(String title, String description, int id, StatusTask status) {
         super(title, description, id, status);
@@ -29,6 +36,18 @@ public class Epic extends Task {
     @Override
     public TypeTask getType() {
         return TypeTask.EPIC;
+    }
+
+    @Override
+    public LocalDateTime getEndTime(){
+        LocalDateTime maxEndTime = subtasks.getFirst().getEndTime();
+        for(Subtask subtask: subtasks){
+            LocalDateTime endTime = subtask.getStartTime();
+            if(maxEndTime.isBefore(endTime)){
+                maxEndTime = endTime;
+            }
+        }
+        return maxEndTime;
     }
 
     @Override
