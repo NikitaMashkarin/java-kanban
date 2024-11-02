@@ -4,6 +4,7 @@ import com.yandex.taskTracker.exception.ValidationException;
 import com.yandex.taskTracker.model.*;
 import com.yandex.taskTracker.model.Task;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -12,7 +13,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Epic> epics = new HashMap<>();
     private final Map<Integer, Subtask> subtasks = new HashMap<>();
     private final HistoryManager historyManager = Managers.getDefaultHistory();
-    private final TreeSet<Task> prioritizedTasks = new TreeSet<>((t1, t2) -> {
+    private final Set<Task> prioritizedTasks = new TreeSet<>((t1, t2) -> {
         if (t1.getStartTime() == null) {
             if (t2.getStartTime() == null) {
                 return 0;
@@ -38,7 +39,7 @@ public class InMemoryTaskManager implements TaskManager {
         return subtasks;
     }
 
-    public TreeSet<Task> getPrioritizedTasks() {
+    public Set<Task> getPrioritizedTasks() {
         return prioritizedTasks;
     }
 
@@ -122,67 +123,61 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addTask(Task task) {
-        if(checkValidationTasks(task)) {
+        if (checkValidationTasks(task)) {
             task.setId(getNextID());
             tasks.put(task.getId(), task);
-            addPrioritizedTasks(task);
         }
     }
 
     @Override
     public void addEpic(Epic epic) {
-        if(checkValidationTasks(epic)) {
+        if (checkValidationTasks(epic)) {
             epic.setId(getNextID());
             epics.put(epic.getId(), epic);
-            addPrioritizedTasks(epic);
         }
     }
 
     @Override
     public void addSubtask(Subtask subtask) {
-        if(checkValidationTasks(subtask)) {
+        if (checkValidationTasks(subtask)) {
             subtask.setId(getNextID());
             Epic epic = epics.get(subtask.getEpicId());
             epic.addSubtask(subtask);
             subtasks.put(subtask.getId(), subtask);
             calculationStatusEpic(epic);
-            addPrioritizedTasks(subtask);
         }
     }
 
     @Override
     public void updateTask(Task task) {
-        if(checkValidationTasks(task)) {
-            int id = task.getId();
-            tasks.put(id, task);
-            addPrioritizedTasks(task);
-        }
+        int id = task.getId();
+        prioritizedTasks.remove(task);
+        prioritizedTasks.add(task);
+        tasks.put(id, task);
     }
 
     @Override
     public void updateEpic(Epic epic) {
-        if(checkValidationTasks(epic)) {
-            Epic oldEpic = epics.get(epic.getId());
-            oldEpic.setDescription(epic.getDescription());
-            addPrioritizedTasks(epic);
-            oldEpic.setTitle(epic.getTitle());
-        }
+        prioritizedTasks.remove(epic);
+        prioritizedTasks.add(epic);
+        Epic oldEpic = epics.get(epic.getId());
+        oldEpic.setDescription(epic.getDescription());
+        oldEpic.setTitle(epic.getTitle());
     }
 
     @Override
     public void updateSubtask(Subtask subtask) {
-        if (checkValidationTasks(subtask)) {
-            int subtaskId = subtask.getId();
-            int epicId = subtask.getEpicId();
-            Subtask oldSubtask = subtasks.get(subtaskId);
-            subtasks.put(subtaskId, subtask);
-            Epic epic = epics.get(epicId);
-            List<Subtask> oldSubtasks = epic.getSubtasks();
-            oldSubtasks.remove(oldSubtask);
-            oldSubtasks.add(subtask);
-            calculationStatusEpic(epic);
-            addPrioritizedTasks(subtask);
-        }
+        prioritizedTasks.remove(subtask);
+        prioritizedTasks.add(subtask);
+        int subtaskId = subtask.getId();
+        int epicId = subtask.getEpicId();
+        Subtask oldSubtask = subtasks.get(subtaskId);
+        subtasks.put(subtaskId, subtask);
+        Epic epic = epics.get(epicId);
+        List<Subtask> oldSubtasks = epic.getSubtasks();
+        oldSubtasks.remove(oldSubtask);
+        oldSubtasks.add(subtask);
+        calculationStatusEpic(epic);
     }
 
     @Override
@@ -228,24 +223,22 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private boolean checkValidationTasks(Task task) {
-        prioritizedTasks.stream()
-                .filter(prioritizedTask -> prioritizedTask.getEndTime().isBefore(task.getStartTime()))
-                .findAny()
-                .map(invalidTask -> {
-                    throw new ValidationException("Ошибка валидации");
+        LocalDateTime startTime = task.getStartTime();
+        LocalDateTime endTime = task.getEndTime();
+
+        boolean isValid = getPrioritizedTasks().stream()
+                .filter(validationTask -> startTime != null && endTime != null && !task.equals(validationTask))
+                .anyMatch(validationTask -> {
+                    LocalDateTime entryStartTime = validationTask.getStartTime();
+                    LocalDateTime entryEndTime = validationTask.getEndTime();
+                    return !(startTime.isAfter(entryEndTime) || endTime.isBefore(entryStartTime));
                 });
-        return true;
-    }
 
-    private void addPrioritizedTasks(Task task) {
-        if (task.getStartTime() == null) {
-            return;
-        }
-
-        if (prioritizedTasks.contains(task)) {
-            prioritizedTasks.remove(task);
+        if (isValid) {
+            throw new ValidationException("Задача " + task.getId() + " пересекается с другой задачей.");
         }
         prioritizedTasks.add(task);
+        return true;
     }
 
     private void calculationStatusEpic(Epic epic) {

@@ -39,11 +39,11 @@ public class Epic extends Task {
     }
 
     @Override
-    public LocalDateTime getEndTime(){
-        LocalDateTime maxEndTime = subtasks.getFirst().getEndTime();
-        for(Subtask subtask: subtasks){
+    public LocalDateTime getEndTime() {
+        LocalDateTime maxEndTime = LocalDateTime.of(1970, 01, 01, 00, 00);
+        for (Subtask subtask : subtasks) {
             LocalDateTime endTime = subtask.getStartTime();
-            if(maxEndTime.isBefore(endTime)){
+            if (maxEndTime.isBefore(endTime)) {
                 maxEndTime = endTime;
             }
         }

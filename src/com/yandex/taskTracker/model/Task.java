@@ -96,9 +96,10 @@ public class Task {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime(){
+    public LocalDateTime getEndTime() {
         return startTime.plus(duration);
     }
+
     @Override
     public String toString() {
         return "com.yandex.taskTracker.model.Task{" +
