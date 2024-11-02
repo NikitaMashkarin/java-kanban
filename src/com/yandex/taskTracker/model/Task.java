@@ -2,7 +2,6 @@ package com.yandex.taskTracker.model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Objects;
 
 public class Task {
