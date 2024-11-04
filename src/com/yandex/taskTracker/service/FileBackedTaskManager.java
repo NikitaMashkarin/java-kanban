@@ -139,8 +139,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         TypeTask typeTask = TypeTask.valueOf(typeTaskStr);
         String name = tasksArray[2];
         String description = tasksArray[4];
-        LocalDateTime startTime = LocalDateTime.parse(tasksArray[5]);
-        Duration duration = Duration.ofMinutes(Long.parseLong(tasksArray[6]));
+        LocalDateTime startTime = null;
+        Duration duration = null;
+        if (tasksArray[5] != null) {
+            startTime = LocalDateTime.parse(tasksArray[5]);
+        }
+        if (tasksArray[6] != null) {
+            duration = Duration.ofMinutes(Long.parseLong(tasksArray[6]));
+        }
         int id = Integer.parseInt(tasksArray[0]);
         int epicId = Integer.parseInt(tasksArray[5]);
         switch (typeTask) {
