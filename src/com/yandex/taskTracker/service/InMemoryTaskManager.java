@@ -130,10 +130,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addEpic(Epic epic) {
-        if (checkValidationTasks(epic)) {
             epic.setId(getNextID());
             epics.put(epic.getId(), epic);
-        }
     }
 
     @Override
@@ -229,9 +227,8 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isValid = getPrioritizedTasks().stream()
                 .filter(validationTask -> startTime != null && endTime != null && !task.equals(validationTask))
                 .anyMatch(validationTask -> {
-                    LocalDateTime entryStartTime = validationTask.getStartTime();
                     LocalDateTime entryEndTime = validationTask.getEndTime();
-                    return !(endTime.isBefore(entryStartTime));
+                    return !(startTime.isAfter(entryEndTime));
                 });
 
         if (isValid) {

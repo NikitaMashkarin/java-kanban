@@ -58,11 +58,11 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @Test
     public void tasksWithTheSpecifiedIdAndTheGeneratedIdDoNotConflict() {
-        Task task1 = new Task("Name", "Description", 1, StatusTask.NEW,
-                Duration.ofMinutes(15), LocalDateTime.now().plus(Duration.ofMinutes(40)));
-        manager.addTask(task1);
         Task task = new Task("Name", "Description");
         manager.addTask(task);
+        Task task1 = new Task("Name", "Description", 2, StatusTask.NEW,
+                Duration.ofMinutes(15), LocalDateTime.now().plus(Duration.ofMinutes(40)));
+        manager.addTask(task1);
         assertEquals(manager.getAllTasks().size(), 2);
 
     }
@@ -208,12 +208,12 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     public void byDeletingAllEpicsWithSubtasksTheyAreDeletedFromTheHistory() {
         Epic epic = new Epic("Epic1", "Epic description");
         manager.addEpic(epic);
-        Subtask subtask = new Subtask("Subtask1", "Subtask description", epic.getId());
+        Subtask subtask = new Subtask("Subtask1", "Subtask description", 2, StatusTask.NEW,  epic.getId(),
+                Duration.ofMinutes(15), LocalDateTime.now().plus(Duration.ofMinutes(20)));
         manager.addSubtask(subtask);
         manager.getEpicById(epic.getId());
         manager.getSubtaskById(subtask.getId());
-        Epic epic1 = new Epic("Epic1", "Epic description", 3, StatusTask.NEW,
-                Duration.ofMinutes(15), LocalDateTime.now().plus(Duration.ofMinutes(40)));
+        Epic epic1 = new Epic("Epic1", "Epic description", 3, StatusTask.NEW);
         manager.addEpic(epic1);
         Subtask subtask1 = new Subtask("Subtask1", "Subtask description", 4, StatusTask.NEW,
                 epic1.getId(), Duration.ofMinutes(15), LocalDateTime.now().plus(Duration.ofMinutes(40)));

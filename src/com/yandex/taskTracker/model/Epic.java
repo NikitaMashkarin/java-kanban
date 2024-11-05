@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Epic extends Task {
     private final List<Subtask> subtasks = new ArrayList<>();
-    LocalDateTime endTime;
+    private LocalDateTime endTime;
 
     public Epic(String title, String description, int id, StatusTask status, Duration duration,
                 LocalDateTime startTime) {
@@ -24,14 +24,7 @@ public class Epic extends Task {
 
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
-        LocalDateTime maxEndTime = null;
-        for (Subtask sub : subtasks) {
-            LocalDateTime endTimeSubtask = sub.getStartTime();
-            if (maxEndTime.isBefore(endTimeSubtask)) {
-                maxEndTime = endTimeSubtask;
-            }
-        }
-        endTime = maxEndTime;
+        endTime = maxEndTime();
     }
 
     public void clearSubtask() {
@@ -62,5 +55,16 @@ public class Epic extends Task {
                 ", startTime =" + getStartTime() +
                 ", endTime = " + getDuration() +
                 '}';
+    }
+
+    private LocalDateTime maxEndTime() {
+        LocalDateTime maxEndTime = subtasks.getFirst().getEndTime();
+        for (Subtask sub : subtasks) {
+            LocalDateTime endTimeSubtask = sub.getStartTime();
+            if (maxEndTime.isBefore(endTimeSubtask)) {
+                maxEndTime = endTimeSubtask;
+            }
+        }
+        return maxEndTime;
     }
 }
