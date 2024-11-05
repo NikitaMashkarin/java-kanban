@@ -2,9 +2,7 @@ package service;
 
 import com.yandex.taskTracker.model.Epic;
 import com.yandex.taskTracker.model.StatusTask;
-import com.yandex.taskTracker.model.Subtask;
 import com.yandex.taskTracker.model.Task;
-import com.yandex.taskTracker.service.InMemoryHistoryManager;
 import com.yandex.taskTracker.service.Managers;
 import com.yandex.taskTracker.service.TaskManager;
 import com.yandex.taskTracker.service.HistoryManager;
@@ -13,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,7 +27,8 @@ class InMemoryHistoryManagerTest {
         Task task = new Task("Name", "Description");
         taskManager.addTask(task);
         taskManager.getTaskById(1);
-        Task task1 = new Task("Name1", "Description1");
+        Task task1 = new Task("Name1", "Description1", 1, StatusTask.NEW, Duration.ofMinutes(15),
+                LocalDateTime.now().plus(Duration.ofMinutes(20)));
         taskManager.updateTask(task1);
         taskManager.getEpicById(1);
         Task oldTask = taskManager.getHistory().getFirst();
