@@ -130,8 +130,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addEpic(Epic epic) {
-            epic.setId(getNextID());
-            epics.put(epic.getId(), epic);
+        epic.setId(getNextID());
+        epics.put(epic.getId(), epic);
     }
 
     @Override
@@ -142,6 +142,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.addSubtask(subtask);
             subtasks.put(subtask.getId(), subtask);
             calculationStatusEpic(epic);
+            endTimeEpic(epic);
         }
     }
 
@@ -176,6 +177,7 @@ public class InMemoryTaskManager implements TaskManager {
             oldSubtasks.remove(oldSubtask);
             oldSubtasks.add(subtask);
             calculationStatusEpic(epic);
+            endTimeEpic(epic);
         }
     }
 
@@ -220,20 +222,39 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
+    private void endTimeEpic(Epic epic) {
+        List<Subtask> subtasks = epic.getSubtasks();
+        LocalDateTime maxEndTime = subtasks.getFirst().getEndTime();
+        for (Subtask sub : subtasks) {
+            LocalDateTime endTimeSubtask = sub.getStartTime();
+            if (maxEndTime.isBefore(endTimeSubtask)) {
+                maxEndTime = endTimeSubtask;
+            }
+        }
+        epic.setEndTime(maxEndTime);
+    }
+
     private boolean checkValidationTasks(Task task) {
         LocalDateTime startTime = task.getStartTime();
         LocalDateTime endTime = task.getEndTime();
 
+        if (startTime == null || endTime == null) {
+            return true;
+        }
+
         boolean isValid = getPrioritizedTasks().stream()
-                .filter(validationTask -> startTime != null && endTime != null && !task.equals(validationTask))
+                .filter(validationTask -> !task.equals(validationTask))
                 .anyMatch(validationTask -> {
-                    LocalDateTime entryEndTime = validationTask.getEndTime();
-                    return !(startTime.isAfter(entryEndTime));
+                    LocalDateTime existStartTime = validationTask.getStartTime();
+                    LocalDateTime existEndTime = validationTask.getEndTime();
+                    return !(endTime.isBefore(existStartTime) || endTime.isEqual(existStartTime) ||
+                            startTime.isAfter(existEndTime) || startTime.isEqual(existEndTime));
                 });
 
         if (isValid) {
             throw new ValidationException("Задача " + task.getId() + " пересекается с другой задачей.");
         }
+
         prioritizedTasks.add(task);
         return true;
     }

@@ -111,8 +111,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                             taskManager.getEpics().put(task.getId(), (Epic) task);
                         } else if (task.getType().equals(TypeTask.SUBTASK)) {
                             taskManager.getSubtasks().put(task.getId(), (Subtask) task);
+                            taskManager.getPrioritizedTasks().add(task);
                         } else {
                             taskManager.getTasks().put(task.getId(), task);
+                            taskManager.getPrioritizedTasks().add(task);
                         }
                     }
                 }
@@ -141,10 +143,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String description = tasksArray[4];
         LocalDateTime startTime = null;
         Duration duration = null;
-        if (tasksArray[5] != null) {
+        String check = null;
+        if (!tasksArray[5].equals(check)) {
             startTime = LocalDateTime.parse(tasksArray[5]);
         }
-        if (tasksArray[6] != null) {
+        if (!tasksArray[6].equals(check)) {
             duration = Duration.ofMinutes(Long.parseLong(tasksArray[6]));
         }
         int id = Integer.parseInt(tasksArray[0]);

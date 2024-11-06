@@ -24,7 +24,6 @@ public class Epic extends Task {
 
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
-        endTime = maxEndTime();
     }
 
     public void clearSubtask() {
@@ -45,6 +44,10 @@ public class Epic extends Task {
         return endTime;
     }
 
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
     @Override
     public String toString() {
         return "com.yandex.taskTracker.model.Epic{" +
@@ -55,16 +58,5 @@ public class Epic extends Task {
                 ", startTime =" + getStartTime() +
                 ", endTime = " + getDuration() +
                 '}';
-    }
-
-    private LocalDateTime maxEndTime() {
-        LocalDateTime maxEndTime = subtasks.getFirst().getEndTime();
-        for (Subtask sub : subtasks) {
-            LocalDateTime endTimeSubtask = sub.getStartTime();
-            if (maxEndTime.isBefore(endTimeSubtask)) {
-                maxEndTime = endTimeSubtask;
-            }
-        }
-        return maxEndTime;
     }
 }
