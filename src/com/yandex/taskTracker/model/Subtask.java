@@ -1,5 +1,8 @@
 package com.yandex.taskTracker.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Subtask extends Task {
 
     private final int epicId;
@@ -9,8 +12,9 @@ public class Subtask extends Task {
         this.epicId = epicId;
     }
 
-    public Subtask(String name, String description, int id, StatusTask status, int epicId) {
-        super(name, description, id, status);
+    public Subtask(String name, String description, int id, StatusTask status, int epicId, Duration duration,
+                   LocalDateTime startTime) {
+        super(name, description, id, status, duration, startTime);
         this.epicId = epicId;
     }
 
@@ -32,6 +36,8 @@ public class Subtask extends Task {
                 ", id=" + getId() +
                 ", status=" + getStatus() +
                 ", epicId=" + epicId +
+                ", startTime =" + getStartTime() +
+                ", endTime = " + getDuration() +
                 '}';
     }
 }
