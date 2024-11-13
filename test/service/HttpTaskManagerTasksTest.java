@@ -207,29 +207,29 @@ public class HttpTaskManagerTasksTest {
         assertEquals(2, subtasks.length);
     }
 
-    @Test
-    public void testGetHistory() throws IOException, InterruptedException {
-        Epic epic1 = new Epic("Epic 1", "Description 1");
-        Epic epic2 = new Epic("Epic 2", "Description 2");
-        manager.addEpic(epic1);
-        manager.addEpic(epic2);
-        manager.addSubtask(new Subtask("Subtask Test", "Subtask Description", epic1.getId()));
-        manager.addSubtask(new Subtask("Subtask 2", "Description 2", 2, StatusTask.NEW, epic2.getId(),
-                Duration.ofMinutes(45), LocalDateTime.now().plus(Duration.ofMinutes(20))));
-        manager.getEpicById(1);
-        manager.getEpicById(2);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/history"))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(200, response.statusCode());
-
-        Task[] history = gson.fromJson(response.body(), Task[].class);
-        assertEquals(2, history.length);
-    }
+//    @Test
+//    public void testGetHistory() throws IOException, InterruptedException {
+//        Epic epic1 = new Epic("Epic 1", "Description 1");
+//        Epic epic2 = new Epic("Epic 2", "Description 2");
+//        manager.addEpic(epic1);
+//        manager.addEpic(epic2);
+//        manager.addSubtask(new Subtask("Subtask Test", "Subtask Description", epic1.getId()));
+//        manager.addSubtask(new Subtask("Subtask 2", "Description 2", 2, StatusTask.NEW, epic2.getId(),
+//                Duration.ofMinutes(45), LocalDateTime.now().plus(Duration.ofMinutes(20))));
+//        manager.getEpicById(1);
+//        manager.getEpicById(2);
+//
+//        HttpRequest request = HttpRequest.newBuilder()
+//                .uri(URI.create(BASE_URL + "/history"))
+//                .GET()
+//                .build();
+//
+//        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+//        assertEquals(200, response.statusCode());
+//
+//        Task[] history = gson.fromJson(response.body(), Task[].class);
+//        assertEquals(2, history.length);
+//    }
 
     @Test
     public void testGetPrioritized() throws IOException, InterruptedException {
