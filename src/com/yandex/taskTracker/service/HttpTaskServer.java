@@ -19,34 +19,66 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.Scanner;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
+    private final TaskManager taskManager;
+    private HttpServer httpServer;
 
-    public static void main(String[] args) throws IOException {
-        HttpServer httpServer = HttpServer.create();
+    public HttpTaskServer(TaskManager taskManager) throws IOException {
+        this.taskManager = taskManager;
+        this.httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
+        this.httpServer.createContext("/tasks", new TasksHandler(taskManager));
+        this.httpServer.createContext("/subtasks", new SubtasksHandler(taskManager));
+        this.httpServer.createContext("/epics", new EpicsHandler(taskManager));
+        this.httpServer.createContext("/history", new HistoryHandler(taskManager));
+        this.httpServer.createContext("/prioritized", new PrioritizedHandler(taskManager));
+    }
 
-        httpServer.bind(new InetSocketAddress(PORT), 0);
-        httpServer.createContext("/tasks", new TasksHandler());
-        httpServer.createContext("/subtasks", new SubtasksHandler());
-        httpServer.createContext("/epics", new EpicsHandler());
-        httpServer.createContext("/history", new HistoryHandler());
-        httpServer.createContext("/prioritized", new PrioritizedHandler());
+    public Gson getGson() {
+        return new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationTypeAdapter()).create();
+    }
+
+    public void start() {
         httpServer.start();
-
         System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
     }
 
-    static class TasksHandler extends BaseHttpHandler implements HttpHandler {
+    public void stop() {
+        httpServer.stop(1);
+        System.out.println("HTTP-сервер остановлен");
+    }
+
+    public static void main(String[] args) throws IOException {
+        TaskManager manager = new InMemoryTaskManager(); // Пример использования
+        HttpTaskServer server = new HttpTaskServer(manager);
+
+        System.out.println("Чтобы запустить сервер, введите 1:");
+        Scanner scanner = new Scanner(System.in);
+        int input = scanner.nextInt();
+        if (input == 1) {
+            server.start();
+        }
+    }
+
+    class TasksHandler extends BaseHttpHandler implements HttpHandler {
+        private final TaskManager taskManager;
+
+        public TasksHandler(TaskManager taskManager) {
+            this.taskManager = taskManager;
+        }
+
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             switch (httpExchange.getRequestMethod()) {
                 case "GET":
-                    GET(httpExchange);
+                    get(httpExchange);
                 case "POST":
-                    POST(httpExchange);
+                    post(httpExchange);
                 case "DELETE":
-                    DELETE(httpExchange);
+                    delete(httpExchange);
                 default:
                     try (OutputStream os = httpExchange.getResponseBody()) {
                         httpExchange.sendResponseHeaders(405, 0);
@@ -56,7 +88,7 @@ public class HttpTaskServer {
             httpExchange.close();
         }
 
-        private void GET(HttpExchange httpExchange) throws IOException {
+        private void get(HttpExchange httpExchange) throws IOException {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                     .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
@@ -81,7 +113,7 @@ public class HttpTaskServer {
             }
         }
 
-        private void POST(HttpExchange httpExchange) throws IOException {
+        private void post(HttpExchange httpExchange) throws IOException {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                     .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
@@ -101,7 +133,7 @@ public class HttpTaskServer {
             Task task = gson.fromJson(jsonObject, Task.class);
             if (pathParts.length == 2) {
                 taskManager.addTask(task);
-                if (taskManager.getTasks().get(task.getId()).equals(task)) {
+                if (taskManager.getTaskById(task.getId()).equals(task)) {
                     sendHasInteractions(httpExchange, 201, "Задача добавлена");
                 } else {
                     sendHasInteractions(httpExchange, 406, "Задача с id" + task.getId()
@@ -113,7 +145,7 @@ public class HttpTaskServer {
                 Optional<Integer> id = getTaskId(pathParts[2]);
                 if (id.isPresent()) {
                     taskManager.updateTask(task);
-                    if (taskManager.getTasks().get(task.getId()).equals(task)) {
+                    if (taskManager.getTaskById(task.getId()).equals(task)) {
                         sendHasInteractions(httpExchange, 201, "Задача изменена");
                     } else {
                         sendHasInteractions(httpExchange, 406, "Задача с id" + task.getId()
@@ -123,7 +155,7 @@ public class HttpTaskServer {
             }
         }
 
-        private void DELETE(HttpExchange httpExchange) throws IOException {
+        private void delete(HttpExchange httpExchange) throws IOException {
             String requestPath = httpExchange.getRequestURI().getPath();
             String[] pathParts = requestPath.split("/");
 
@@ -131,7 +163,7 @@ public class HttpTaskServer {
                 Optional<Integer> id = getTaskId(pathParts[2]);
                 if (id.isPresent()) {
                     taskManager.removeTaskById(id.get());
-                    if (taskManager.getTasks().get(id.get()) == null) {
+                    if (taskManager.getTaskById(id.get()) == null) {
                         sendHasInteractions(httpExchange, 201, "Задача удалена");
                     }
                 }
@@ -147,16 +179,22 @@ public class HttpTaskServer {
         }
     }
 
-    static class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
+    class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
+        private final TaskManager taskManager;
+
+        public SubtasksHandler(TaskManager taskManager) {
+            this.taskManager = taskManager;
+        }
+
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             switch (httpExchange.getRequestMethod()) {
                 case "GET":
-                    GET(httpExchange);
+                    get(httpExchange);
                 case "POST":
-                    POST(httpExchange);
+                    post(httpExchange);
                 case "DELETE":
-                    DELETE(httpExchange);
+                    delete(httpExchange);
                 default:
                     try (OutputStream os = httpExchange.getResponseBody()) {
                         httpExchange.sendResponseHeaders(405, 0);
@@ -166,7 +204,7 @@ public class HttpTaskServer {
             httpExchange.close();
         }
 
-        private void GET(HttpExchange httpExchange) throws IOException {
+        private void get(HttpExchange httpExchange) throws IOException {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                     .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
@@ -191,7 +229,7 @@ public class HttpTaskServer {
             }
         }
 
-        private void POST(HttpExchange httpExchange) throws IOException {
+        private void post(HttpExchange httpExchange) throws IOException {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                     .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
@@ -211,7 +249,7 @@ public class HttpTaskServer {
             Subtask subtask = gson.fromJson(jsonObject, Subtask.class);
             if (pathParts.length == 2) {
                 taskManager.addSubtask(subtask);
-                if (taskManager.getSubtasks().get(subtask.getId()).equals(subtask)) {
+                if (taskManager.getSubtaskById(subtask.getId()).equals(subtask)) {
                     sendHasInteractions(httpExchange, 201, "Задача добавлена");
                 } else {
                     sendHasInteractions(httpExchange, 406, "Задача с id" + subtask.getId()
@@ -223,7 +261,7 @@ public class HttpTaskServer {
                 Optional<Integer> id = getSubtaskId(pathParts[2]);
                 if (id.isPresent()) {
                     taskManager.updateSubtask(subtask);
-                    if (taskManager.getSubtasks().get(subtask.getId()).equals(subtask)) {
+                    if (taskManager.getSubtaskById(subtask.getId()).equals(subtask)) {
                         sendHasInteractions(httpExchange, 201, "Задача изменена");
                     } else {
                         sendHasInteractions(httpExchange, 406, "Задача с id" + subtask.getId()
@@ -233,7 +271,7 @@ public class HttpTaskServer {
             }
         }
 
-        private void DELETE(HttpExchange httpExchange) throws IOException {
+        private void delete(HttpExchange httpExchange) throws IOException {
             String requestPath = httpExchange.getRequestURI().getPath();
             String[] pathParts = requestPath.split("/");
 
@@ -241,7 +279,7 @@ public class HttpTaskServer {
                 Optional<Integer> id = getSubtaskId(pathParts[2]);
                 if (id.isPresent()) {
                     taskManager.removeSubtaskById(id.get());
-                    if (taskManager.getSubtasks().get(id.get()) == null) {
+                    if (taskManager.getSubtaskById(id.get()) == null) {
                         sendHasInteractions(httpExchange, 201, "Задача удалена");
                     }
                 }
@@ -257,16 +295,22 @@ public class HttpTaskServer {
         }
     }
 
-    static class EpicsHandler extends BaseHttpHandler implements HttpHandler {
+    class EpicsHandler extends BaseHttpHandler implements HttpHandler {
+        private final TaskManager taskManager;
+
+        public EpicsHandler(TaskManager taskManager) {
+            this.taskManager = taskManager;
+        }
+
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             switch (httpExchange.getRequestMethod()) {
                 case "GET":
-                    GET(httpExchange);
+                    get(httpExchange);
                 case "POST":
-                    POST(httpExchange);
+                    post(httpExchange);
                 case "DELETE":
-                    DELETE(httpExchange);
+                    delete(httpExchange);
                 default:
                     try (OutputStream os = httpExchange.getResponseBody()) {
                         httpExchange.sendResponseHeaders(405, 0);
@@ -276,7 +320,7 @@ public class HttpTaskServer {
             httpExchange.close();
         }
 
-        private void GET(HttpExchange httpExchange) throws IOException {
+        private void get(HttpExchange httpExchange) throws IOException {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                     .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
@@ -313,7 +357,7 @@ public class HttpTaskServer {
             }
         }
 
-        private void POST(HttpExchange httpExchange) throws IOException {
+        private void post(HttpExchange httpExchange) throws IOException {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                     .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
@@ -333,7 +377,7 @@ public class HttpTaskServer {
             Epic epic = gson.fromJson(jsonObject, Epic.class);
             if (pathParts.length == 2) {
                 taskManager.addEpic(epic);
-                if (taskManager.getEpics().get(epic.getId()).equals(epic)) {
+                if (taskManager.getEpicById(epic.getId()).equals(epic)) {
                     sendHasInteractions(httpExchange, 201, "Епик добавлен");
                 }
             }
@@ -342,14 +386,14 @@ public class HttpTaskServer {
                 Optional<Integer> id = getEpicId(pathParts[2]);
                 if (id.isPresent()) {
                     taskManager.updateEpic(epic);
-                    if (taskManager.getEpics().get(epic.getId()).equals(epic)) {
+                    if (taskManager.getEpicById(epic.getId()).equals(epic)) {
                         sendHasInteractions(httpExchange, 201, "Епик изменен");
                     }
                 }
             }
         }
 
-        private void DELETE(HttpExchange httpExchange) throws IOException {
+        private void delete(HttpExchange httpExchange) throws IOException {
             String requestPath = httpExchange.getRequestURI().getPath();
             String[] pathParts = requestPath.split("/");
 
@@ -357,7 +401,7 @@ public class HttpTaskServer {
                 Optional<Integer> id = getEpicId(pathParts[2]);
                 if (id.isPresent()) {
                     taskManager.removeEpicById(id.get());
-                    if (taskManager.getEpics().get(id.get()) == null) {
+                    if (taskManager.getEpicById(id.get()) == null) {
                         sendHasInteractions(httpExchange, 201, "Епик удален");
                     }
                 }
@@ -373,11 +417,17 @@ public class HttpTaskServer {
         }
     }
 
-    static class HistoryHandler extends BaseHttpHandler implements HttpHandler {
+    class HistoryHandler extends BaseHttpHandler implements HttpHandler {
+        private final TaskManager taskManager;
+
+        public HistoryHandler(TaskManager taskManager) {
+            this.taskManager = taskManager;
+        }
+
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             if (httpExchange.getRequestMethod().equals("GET")) {
-                GET(httpExchange);
+                get(httpExchange);
             } else {
                 try (OutputStream os = httpExchange.getResponseBody()) {
                     httpExchange.sendResponseHeaders(405, 0);
@@ -387,7 +437,7 @@ public class HttpTaskServer {
             httpExchange.close();
         }
 
-        private void GET(HttpExchange httpExchange) throws IOException {
+        private void get(HttpExchange httpExchange) throws IOException {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                     .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
@@ -402,11 +452,17 @@ public class HttpTaskServer {
         }
     }
 
-    static class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
+    class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
+        private final TaskManager taskManager;
+
+        public PrioritizedHandler(TaskManager taskManager) {
+            this.taskManager = taskManager;
+        }
+
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             if (httpExchange.getRequestMethod().equals("GET")) {
-                GET(httpExchange);
+                get(httpExchange);
             } else {
                 try (OutputStream os = httpExchange.getResponseBody()) {
                     httpExchange.sendResponseHeaders(405, 0);
@@ -416,7 +472,7 @@ public class HttpTaskServer {
             httpExchange.close();
         }
 
-        private void GET(HttpExchange httpExchange) throws IOException {
+        private void get(HttpExchange httpExchange) throws IOException {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                     .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
@@ -431,7 +487,7 @@ public class HttpTaskServer {
         }
     }
 
-    static class LocalDateTimeTypeAdapter extends TypeAdapter<LocalDateTime> {
+    class LocalDateTimeTypeAdapter extends TypeAdapter<LocalDateTime> {
         private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy:MM:dd:HH:mm:ss.SSS");
 
         @Override
@@ -445,7 +501,7 @@ public class HttpTaskServer {
         }
     }
 
-    static class DurationTypeAdapter extends TypeAdapter<Duration> {
+    class DurationTypeAdapter extends TypeAdapter<Duration> {
         @Override
         public void write(final JsonWriter jsonWriter, final Duration duration) throws IOException {
             jsonWriter.value(String.valueOf(duration));
