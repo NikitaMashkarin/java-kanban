@@ -1,7 +1,6 @@
 package service;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.yandex.taskTracker.model.Epic;
 import com.yandex.taskTracker.model.Subtask;
 import com.yandex.taskTracker.model.Task;
